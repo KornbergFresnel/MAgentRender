@@ -1,5 +1,5 @@
 # MAgentRender
-a interactive pygame client for MAgent
+an interactive pygame client for MAgent
 
 **features (will have)**
 
