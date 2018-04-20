@@ -1,6 +1,17 @@
 # MAgentRender
 an interactive pygame client for MAgent
 
+**Usage**
+
+```python
+python render.py
+```
+
+**Requirement**
+
+- python, version >= 3.5
+- pygame, version >= 1.9.3
+
 **features (will have)**
 
 - PARALLEL RENDERING
