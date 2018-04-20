@@ -1,12 +1,15 @@
 import pygame as pg
+
 import config
-from model import Hold, Player, ControlPanel
+
 from pygame.locals import *
+
+from utils import Hold
+from player import Player
+from controls import ControlPanel
 
 
 hold = Hold()
-player = None
-
 
 pg.init()
 info = pg.display.Info()
