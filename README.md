@@ -8,3 +8,7 @@ a interactive pygame client for MAgent
 - REAL-TIME LEARNING CURVE
 - ATTENTION: SELECT AN AGENT TO WATCH ITS LOCAL VIEW
 - OTHERS
+
+**Current UI**
+
+<img src="assets/Capture.PNG" style="zoom: 50%">
