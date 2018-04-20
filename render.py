@@ -31,6 +31,7 @@ control.load_everything()
 
 # ==== Main runner ====
 hold.running = True
+clock = pg.time.Clock()
 
 while hold.running:
     for event in pg.event.get():
@@ -38,9 +39,13 @@ while hold.running:
             hold.running = False
         elif event.type == KEYDOWN:
             hold.key_event_handler(pg.key.get_pressed())
+        control.listen_widgets_event(event)
     
     player.step()
+    control.update()
     hold.screen.blit(player.surf, (0, 0))
     hold.screen.blit(control.surf, (int(resolution[0] * config.SPLIT_ETA), 0))
     pg.display.flip()
+    clock.tick(config.FPS)
+
 pg.quit()
