@@ -17,6 +17,7 @@ class ControlPanel(Sprite):
         self.surf.fill(bg_color)
         self.rect = self.surf.get_rect()
         self.width, self.height = control_area
+        self.boder_margin = 20
     
     def _custom_ui(self):
         # Display some text at center
@@ -32,7 +33,7 @@ class ControlPanel(Sprite):
         last_y = self._draw_logo(centry_offset=last_y + 20)
         last_y = self._statis_info_box(centry_offset=last_y + 20)
         last_y = self._add_widgets(centry_offset=last_y + 20)
-        self._local_view(centry_offset=last_y + 50)
+        self._local_view(centry_offset=last_y + 20)
     
     def _draw_logo(self, centry_offset: int):
         last_y, line_width, margin = centry_offset, 3, 4
@@ -44,7 +45,7 @@ class ControlPanel(Sprite):
         pg.draw.lines(self.surf, Color.WHITE, False, dots, line_width)
         return last_y + y_step * 5
     
-    def _set_title(self, content: str, font_size: int, centry_offset: int, pre_size: tuple):
+    def _set_title(self, content: str, font_size: int, centry_offset: int, height: int):
         # Display some text at center
         font = pg.font.Font(None, font_size)
         text = font.render(content, 1, (255, 255, 255))
@@ -53,22 +54,26 @@ class ControlPanel(Sprite):
         textpos.x = self.rect.x + 40
         textpos.centery += centry_offset
         self.surf.blit(text, textpos)
-        
+
+        last_y, line_width, border_pad, border_margin  = textpos.centery, 1, 5, self.boder_margin
+        width, height = self.width - border_margin * 2, height
+        inner_width, inner_height = width - border_pad * 2, height - int(textpos.height / 2) - border_pad * 2
+        inner_topx, inner_topy = border_margin + border_pad, textpos.y + int(textpos.height) + border_pad
+
         # Draw border
-        last_y, line_width, border_margin = textpos.centery, 1, 20
-        dots = [[textpos.x - 5, last_y], [border_margin, last_y], [border_margin, pre_size[1] + last_y],
-                [pre_size[0], pre_size[1] + last_y], [pre_size[0], last_y], [textpos.x + textpos.width + 5, last_y]]
+        dots = [[textpos.x - 5, last_y], [border_margin, last_y], [border_margin, height + last_y],
+                [self.width - border_margin, height + last_y], [self.width - border_margin, last_y], [textpos.x + textpos.width + 5, last_y]]
         pg.draw.lines(self.surf, Color.WHITE, False, dots, line_width)
-        return textpos.y + textpos.height + 5
+
+        return inner_topx, inner_topy, inner_width, inner_height
     
     def _statis_info_box(self, centry_offset):
         # Set title
-        width, height = int(self.width * 0.8), int(self.height * 0.25)
-        centry_offset = self._set_title(content='Learning curve', font_size=30, centry_offset=centry_offset, pre_size=(width + 70, height + 50))
+        height = int(self.height * 0.3)
+        topx, topy, width, height = self._set_title(content='Learning curve', font_size=30, centry_offset=centry_offset, height=height)
         dpi = 40
-        figsize = [int((width + dpi - 1) / dpi), int((height + dpi - 1) / dpi)]
+        figsize = [width / dpi, height / dpi]
 
-        # self.statis = pg.Surface((width, height))
         plt.style.use('seaborn-darkgrid')
         palette = plt.get_cmap('Set1')
         fig = pylab.figure(figsize=figsize, dpi=dpi)
@@ -89,7 +94,7 @@ class ControlPanel(Sprite):
 
         sub_pos = self.statis.get_rect()
         sub_pos.centerx = self.rect.centerx
-        sub_pos.centery += centry_offset + 5
+        sub_pos.centery = topy + int(height / 2)
         self.statis_pos = sub_pos
         self.surf.blit(self.statis, sub_pos)
 
@@ -110,34 +115,37 @@ class ControlPanel(Sprite):
             print('[INFO] Focus on input')
         
         # Register train control
-        self.btn_train_control = Button(rect=(0, 0, 150, 50), color=Color.INFO, trigger=button_trigger, 
-                                    text='TRAINING PAUSE', **BUTTON_STYLE)
-        self.btn_train_control.rect.center = (self.rect.centerx - 130, centry_offset + 50)
+        margin_btn = 10
+        capable_x = self.width - self.boder_margin * 2
+        btn_width, btn_height = (capable_x - margin_btn * 2) / 3, int(self.height * 0.08)
+        self.btn_train_control = Button(rect=(0, 0, btn_width, btn_height), color=Color.INFO, trigger=button_trigger, 
+                                    text='TRAIN / PAUSE', **BUTTON_STYLE)
+        self.btn_train_control.rect.center = (self.boder_margin + int(btn_width / 2), centry_offset + int(btn_height / 2))
         self.btn_train_control.update(self.surf)
 
         # Register stats control
-        self.btn_stat_control = Button(rect=(0, 0, 150, 50), color=Color.INFO, trigger=button_trigger, 
-                                    text='FLUSH LEARNING CURVE', **BUTTON_STYLE)
-        self.btn_stat_control.rect.center = (self.rect.centerx + 30, centry_offset + 50)
+        self.btn_stat_control = Button(rect=(0, 0, btn_width, btn_height), color=Color.INFO, trigger=button_trigger, 
+                                    text='FLUSH CURVE', **BUTTON_STYLE)
+        self.btn_stat_control.rect.center = (self.boder_margin + margin_btn + int(btn_width * 3 / 2), centry_offset + int(btn_height / 2))
         self.btn_stat_control.update(self.surf)
 
         # Register agent id selector
-        self.id_selector = InputText(rect=(0, 0, 100, 50), color=Color.WHITE, trigger=input_trigger, placeholder='input agent id ...')
-        self.id_selector.rect.center = (self.rect.centerx + 165, centry_offset + 50)
+        self.id_selector = InputText(rect=(0, 0, btn_width, btn_height), color=Color.WHITE, trigger=input_trigger, placeholder='input ...')
+        self.id_selector.rect.center = (self.boder_margin + margin_btn * 2 + int(btn_width * 5 / 2), centry_offset + int(btn_height / 2))
         self.id_selector.update(self.surf)
 
-        return centry_offset + 50
+        return centry_offset + btn_height
 
     def _local_view(self, centry_offset: int, agent_id=None):
         # Set title
-        width = int(self.width * 0.8)
-        height = width
-        radius = int(width / 3) + 27
-        centry_offset = self._set_title(content='Attention View', font_size=30, centry_offset=centry_offset, pre_size=(width + 70, height))
-        
+        height = int(self.height * 0.35)
+        topx, topy, width, height = self._set_title(content='Attention View', font_size=30, centry_offset=centry_offset, height=height)
+        centery = topy + int(height / 2)
+        radius = int(height / 2)
+
         # Draw local circle
-        pg.draw.circle(self.surf, Color.WHITE, [self.rect.centerx, centry_offset + int(width / 2) - 12], radius, radius)
-        pg.draw.circle(self.surf, Color.BLACK, [self.rect.centerx, centry_offset + int(width / 2) - 12], radius + 2, 2)
+        pg.draw.circle(self.surf, Color.WHITE, [self.rect.centerx, centery], radius, radius)
+        pg.draw.circle(self.surf, Color.BLACK, [self.rect.centerx, centery], radius + 2, 2)
         return None
     
     def load_everything(self):

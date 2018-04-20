@@ -17,7 +17,7 @@ class Button(object):
     
     def _parse(self, kwargs):
         settings = {"text" : None,
-                    "font" : pg.font.Font(None,16),
+                    "font" : pg.font.Font(None, 14),
                     "call_on_release" : True,
                     "hover_color" : None,
                     "clicked_color" : None,
