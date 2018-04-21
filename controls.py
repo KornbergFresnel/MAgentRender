@@ -1,44 +1,47 @@
 import pygame as pg
-import pylab
-import matplotlib.pyplot as plt
-import matplotlib.backends.backend_agg as agg
 import numpy as np
 from pygame.locals import *
 from numpy.random import randint
 from pygame.sprite import Sprite
 from config import Color
-from widgets import Button, InputText
+from widgets.button import Button
+from widgets.statis import StatisPanel
+from widgets.textinput import InputText
+from widgets.attention import Attention
 
 
 class ControlPanel(Sprite):
-    def __init__(self, control_area: tuple, bg_color: tuple):
+    def __init__(self, pos, control_area: tuple, bg_color: tuple):
         super().__init__()
         self.surf = pg.Surface(control_area).convert()
         self.surf.fill(bg_color)
-        self.rect = self.surf.get_rect()
+        self.rect = self.surf.get_rect(center=(pos[0] + int(control_area[0] / 2), pos[1] + int(control_area[1] / 2)))
+        self.image = self.surf
         self.width, self.height = control_area
+        self.relate_center = [self.rect.centerx - self.rect.x, self.rect.centery - self.rect.y]
+        self.relate_top = [0, 0]
         self.boder_margin = 20
         self.bg_color = bg_color
         self.centry_set = {}
+        self.group = pg.sprite.Group()
     
     def _custom_ui(self):
         # Display some text at center
         font = pg.font.Font(None, 36)
         text = font.render('CONTROL PANEL', 1, (255, 255, 255))
-        textpos = text.get_rect()
-        textpos.centerx = self.rect.centerx
-        textpos.centery += 10
+        textpos = text.get_rect(center=(self.relate_center[0], int(self.height * 0.04)))
         self.surf.blit(text, textpos)
 
         last_y = textpos.y + textpos.height
+        margin = int(self.height * 0.02)
         # Draw logo
-        last_y = self._draw_logo(centry_offset=last_y + 20)
-        self.centry_set['statis_centry'] = last_y + 20
-        last_y = self._statis_info_box(centry_offset=last_y + 20)
-        self.centry_set['widgets_centry'] = last_y + 20
-        last_y = self._add_widgets(centry_offset=last_y + 20)
-        self.centry_set['local_view_centry'] = last_y + 20
-        self._local_view(centry_offset=last_y + 20)
+        last_y = self._draw_logo(centry_offset=last_y + margin)
+        self.centry_set['statis_centry'] = last_y + margin
+        last_y = self._statis_info_box(centry_offset=last_y + margin)
+        self.centry_set['widgets_centry'] = last_y + margin
+        last_y = self._add_widgets(centry_offset=last_y + margin)
+        self.centry_set['local_view_centry'] = last_y + margin
+        self._local_view(centry_offset=last_y + margin)
     
     def _draw_logo(self, centry_offset: int):
         last_y, line_width, margin = centry_offset, 3, 4
@@ -55,8 +58,7 @@ class ControlPanel(Sprite):
         font = pg.font.Font(None, font_size)
         text = font.render(content, 1, (255, 255, 255))
         textpos = text.get_rect()
-        # textpos.centerx = self.rect.centerx
-        textpos.x = self.rect.x + 40
+        textpos.x = self.relate_top[0] + int(self.width * 0.08)
         textpos.centery += centry_offset
         self.surf.blit(text, textpos)
 
@@ -76,57 +78,8 @@ class ControlPanel(Sprite):
         # Set title
         height = int(self.height * 0.3)
         topx, topy, width, height = self._set_title(content='Learning curve', font_size=30, centry_offset=centry_offset, height=height)
-        dpi = 40
-        figsize = [width / dpi, height / dpi]
-
-        plt.style.use('seaborn-darkgrid')
-        palette = plt.get_cmap('Set1')
-        fig = pylab.figure(figsize=figsize, dpi=dpi)
-        ax = fig.gca()
-
-        # load data
-        x = np.arange(0., 2., 0.01)
-        y = np.sin(2 * np.pi * x)
-        ax.plot(x, y, color=palette(0))
-        plt.tight_layout()
-
-        canvas = agg.FigureCanvasAgg(fig)
-        canvas.draw()
-        size = canvas.get_width_height()
-        renderer = canvas.get_renderer()
-        raw_data = renderer.tostring_rgb()
-        statis = pg.image.fromstring(raw_data, size, 'RGB')
-        sub_pos = statis.get_rect()
-        sub_pos.centerx = self.rect.centerx
-        sub_pos.centery = topy + int(height / 2)
-        self.statis_pos = sub_pos
-        self.figsize, self.dpi = figsize, dpi
-        self.surf.blit(statis, sub_pos)
-
-        return sub_pos.y + height
-    
-    def _flush_statics(self, learning_curve=None):
-        if learning_curve is None:
-            return
-        self.surf.fill(self.bg_color, pg.Rect(self.statis_pos.x, self.statis_pos.y, self.statis_pos.width, self.statis_pos.height))
-        fig = pylab.figure(figsize=self.figsize, dpi=self.dpi)
-        ax = fig.gca()
-
-        # load data
-        x = np.arange(0., 2., 0.01)
-        y = np.sin(2 * np.pi * x)
-
-        palette = plt.get_cmap('Set1')
-        ax.plot(np.arange(len(learning_curve)), learning_curve, color=palette(0))
-        plt.tight_layout()
-
-        canvas = agg.FigureCanvasAgg(fig)
-        canvas.draw()
-        size = canvas.get_width_height()
-        renderer = canvas.get_renderer()
-        raw_data = renderer.tostring_rgb()
-        statis = pg.image.fromstring(raw_data, size, 'RGB')
-        self.surf.blit(statis, self.statis_pos)
+        self.group.add(StatisPanel(pos=(topx, topy), width=width, height=height, dpi=40, bg_color=self.bg_color))
+        return topy + height
     
     def _add_widgets(self, centry_offset: int):
         BUTTON_STYLE = {
@@ -145,7 +98,7 @@ class ControlPanel(Sprite):
         # Register train control
         margin_btn = 10
         capable_x = self.width - self.boder_margin * 2
-        btn_width, btn_height = (capable_x - margin_btn * 2) / 3, int(self.height * 0.08)
+        btn_width, btn_height = (capable_x - margin_btn * 2) / 3, int(self.height * 0.05)
         self.btn_train_control = Button(rect=(0, 0, btn_width, btn_height), color=Color.INFO, trigger=button_trigger, 
                                     text='TRAIN / PAUSE', **BUTTON_STYLE)
         self.btn_train_control.rect.center = (self.boder_margin + int(btn_width / 2), centry_offset + int(btn_height / 2))
@@ -166,14 +119,12 @@ class ControlPanel(Sprite):
 
     def _local_view(self, centry_offset: int, agent_id=None):
         # Set title
-        height = int(self.height * 0.35)
+        height = self.height - centry_offset - int(self.height * 0.04)
+        # height = int(self.height * 0.35)
         topx, topy, width, height = self._set_title(content='Attention View', font_size=30, centry_offset=centry_offset, height=height)
         centery = topy + int(height / 2)
-        radius = int(height / 2)
-
-        # Draw local circle
-        pg.draw.circle(self.surf, Color.WHITE, [self.rect.centerx, centery], radius, radius)
-        pg.draw.circle(self.surf, Color.BLACK, [self.rect.centerx, centery], radius + 2, 2)
+        print('[INFO] ', width, height)
+        self.group.add(Attention((self.relate_center[0], centery), width, height, self.bg_color))
         return None
     
     def load_everything(self):
@@ -184,10 +135,9 @@ class ControlPanel(Sprite):
         self.btn_stat_control.check_event(event)
         self.id_selector.check_event(event)     
     
-    def update(self, learning_curve=None):
-        # self._statis_info_box(centry_offset=self.centry_set['statis_centry'])
-        self._flush_statics(learning_curve)
-        self._local_view(centry_offset=self.centry_set['local_view_centry'])
+    def update(self, *args):
+        self.group.draw(self.surf)
+        self.group.update(args[1])
         self.btn_train_control.update(self.surf)
         self.btn_stat_control.update(self.surf)
         self.id_selector.update(self.surf)
