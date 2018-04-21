@@ -2,12 +2,15 @@ import os.path as osp
 
 
 BASE_DIR = osp.dirname(osp.abspath(__file__))
-GLOBAL_SCALE = 0.6
+GLOBAL_SCALE = 0.7
 MAIN_BG_COLOR = (255, 255, 255)
 PLAYER_BG_COLOR = (255, 255, 255)
 CONTROL_BG_COLOR = (0, 42, 56)
 SPLIT_ETA = 0.7  # split main window for player and control panel
 FPS = 60
+SPEED_MAX = 5
+SPEED_MIN = -4
+FLUSH_FREQ = 20
 
 
 class Color:

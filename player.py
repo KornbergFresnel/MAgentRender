@@ -4,6 +4,7 @@ from pygame.locals import *
 from numpy.random import randint
 from pygame.sprite import Sprite
 from config import Color
+from config import SPEED_MAX, SPEED_MIN
 
 
 class Player(Sprite):
@@ -16,10 +17,11 @@ class Player(Sprite):
         self.width, self.height = control_area
         self.border_width = 0
         self.agents = None
-        self.step_random = lambda x: zip(randint(-1, 2, size=x), randint(-1, 2, size=x))
+        self.step_random = lambda x: zip(randint(SPEED_MIN, SPEED_MAX, size=x), randint(SPEED_MIN, SPEED_MAX, size=x))
         self.agent_property = {'size': [10, 10], 'color': (200, 200, 200)}
         self.agent_border = (self.width - self.border_width - 10, self.height - self.border_width - 10)
         self.agent_num = agent_num
+        self.last_fps = 0
     
     def _custom_ui(self):
         # Display some text at center
@@ -46,7 +48,15 @@ class Player(Sprite):
     def load_everything(self):
         self._custom_ui()
     
-    def step(self):
+    def flush_fps(self, fps: int, color: tuple):
+        font = pg.font.Font(None, 20)
+        fps_text = font.render('FPS: {}'.format(fps), 1, color)
+        self.last_fps = fps
+        textpos = fps_text.get_rect()
+        textpos.centerx = self.rect.centerx
+        self.surf.blit(fps_text, textpos)
+    
+    def step(self, fps: int):
         """Let agent go
         """
         # refill backgroud
@@ -55,7 +65,11 @@ class Player(Sprite):
         step = list(self.step_random(self.agent_num))
         w, h = self.agent_property['size']
         for i, key in enumerate(self.agents.keys()):
+            # pg.draw.rect(self.surf, self.bg_color, [self.agents[key][0], self.agents[key][1], w, h])  
             x = max(self.border_width, min(self.agent_border[0], self.agents[key][0] + step[i][0]))
             y = max(self.border_width, min(self.agent_border[1], self.agents[key][1] + step[i][1]))
             self.agents[key] = (x, y)
             pg.draw.rect(self.surf, Color.AGENT, [self.agents[key][0], self.agents[key][1], w, h])  
+        
+        # display fps
+        self.flush_fps(fps=fps, color=Color.BLACK)
