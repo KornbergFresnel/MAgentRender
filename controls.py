@@ -3,7 +3,7 @@ import numpy as np
 from pygame.locals import *
 from numpy.random import randint
 from pygame.sprite import Sprite
-from config import Color
+from config import Color, GLOBAL_SCALE
 from widgets.button import Button
 from widgets.statis import StatisPanel
 from widgets.textinput import InputText
@@ -20,14 +20,14 @@ class ControlPanel(Sprite):
         self.width, self.height = control_area
         self.relate_center = [self.rect.centerx - self.rect.x, self.rect.centery - self.rect.y]
         self.relate_top = [0, 0]
-        self.boder_margin = 20
+        self.boder_margin = int(self.width * 0.03)
         self.bg_color = bg_color
         self.centry_set = {}
         self.group = pg.sprite.Group()
     
     def _custom_ui(self):
         # Display some text at center
-        font = pg.font.Font(None, 36)
+        font = pg.font.Font(None, int(45 * GLOBAL_SCALE))
         text = font.render('CONTROL PANEL', 1, (255, 255, 255))
         textpos = text.get_rect(center=(self.relate_center[0], int(self.height * 0.04)))
         self.surf.blit(text, textpos)
@@ -46,7 +46,7 @@ class ControlPanel(Sprite):
     def _draw_logo(self, centry_offset: int):
         last_y, line_width, margin = centry_offset, 3, 4
         y_step = line_width + margin
-        border_margin = 20
+        border_margin = self.boder_margin
         dots = [[border_margin, last_y], [self.width - border_margin, last_y], 
                 [self.width - border_margin, last_y + y_step * 2], [border_margin, last_y + y_step * 2],
                 [border_margin, last_y + y_step * 4], [self.width - border_margin, last_y + y_step * 4]]
@@ -58,7 +58,7 @@ class ControlPanel(Sprite):
         font = pg.font.Font(None, font_size)
         text = font.render(content, 1, (255, 255, 255))
         textpos = text.get_rect()
-        textpos.x = self.relate_top[0] + int(self.width * 0.08)
+        textpos.x = self.relate_top[0] + int(self.width * 0.1)
         textpos.centery += centry_offset
         self.surf.blit(text, textpos)
 
@@ -77,7 +77,7 @@ class ControlPanel(Sprite):
     def _statis_info_box(self, centry_offset):
         # Set title
         height = int(self.height * 0.3)
-        topx, topy, width, height = self._set_title(content='Learning curve', font_size=30, centry_offset=centry_offset, height=height)
+        topx, topy, width, height = self._set_title(content='Learning curve', font_size=int(40 * GLOBAL_SCALE), centry_offset=centry_offset, height=height)
         self.group.add(StatisPanel(pos=(topx, topy), width=width, height=height, dpi=40, bg_color=self.bg_color))
         return topy + height
     
@@ -121,7 +121,7 @@ class ControlPanel(Sprite):
         # Set title
         height = self.height - centry_offset - int(self.height * 0.04)
         # height = int(self.height * 0.35)
-        topx, topy, width, height = self._set_title(content='Attention View', font_size=30, centry_offset=centry_offset, height=height)
+        topx, topy, width, height = self._set_title(content='Attention View', font_size=int(40 * GLOBAL_SCALE), centry_offset=centry_offset, height=height)
         centery = topy + int(height / 2)
         print('[INFO] ', width, height)
         self.group.add(Attention((self.relate_center[0], centery), width, height, self.bg_color))

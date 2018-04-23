@@ -16,6 +16,7 @@ def draw_rects(surf, color, num, size, x_min, x_max, y_min, y_max):
     pos_list = list(zip(width_random, height_random))
     # pool = ThreadPool(4)
     for pos in pos_list:
+        color = Color.AGENT if pos[0] % 2 == 0 else Color.AGENT_B
         pg.draw.rect(surf, color, [pos[0], pos[1], size, size])
 
     # func = lambda x: pg.draw.rect(surf, color, [x[0], x[1], size, size])
@@ -51,10 +52,10 @@ class Attention(Sprite):
         
     def _set(self, attention=None):
         pg.draw.circle(self.image, (255, 255, 255), [self.fake_centerx, self.fake_centery], self.radius, self.radius)
-        draw_rects(self.image, Color.AGENT, num=10, size=10, x_min=self.min_x, x_max=self.max_x, y_min=self.min_y, y_max=self.max_y)
+        draw_rects(self.image, Color.AGENT, num=10, size=10, x_min=self.min_x, x_max=self.max_x - 10, y_min=self.min_y, y_max=self.max_y - 10)
     
     def update(self, *args):
-        if self.stat % 10 == 0:
+        if self.stat % 1 == 0:
             self.image.fill(self.bg_color)
             self._set()
         self.stat += 1

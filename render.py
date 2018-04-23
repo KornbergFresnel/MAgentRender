@@ -22,7 +22,7 @@ pg.display.set_caption('Magent Render')
 
 split_line = int(resolution[0] * (1. - config.SPLIT_ETA))
 # ==== Set player ====
-player = Player(pos=(0, 0), control_area=(resolution[0] - split_line, resolution[1]), bg_color=config.PLAYER_BG_COLOR, agent_num=428)
+player = Player(pos=(0, 0), control_area=(resolution[0] - split_line, resolution[1]), bg_color=config.PLAYER_BG_COLOR, agent_num=228)
 player.load_everything()
 
 

@@ -23,10 +23,10 @@ class Agent(Sprite):
         self.stat = 1
     
     def move(self, dir_x, dir_y):
-        if self.stat % 30 == 0:
-            init = np.random.choice([1, 2, 3, 4], 1)[0]
-            inity = np.random.choice([1, 2, 3, 4], 1)[0]
-            self.dir_x, self.dir_y = np.random.choice([-init, init], 1), np.random.choice([-inity, inity], 1)
+        # if self.stat % 30 == 0:
+        #     init = np.random.choice([1, 2, 3, 4], 1)[0]
+        #     inity = np.random.choice([1, 2, 3, 4], 1)[0]
+        #     self.dir_x, self.dir_y = np.random.choice([-init, init], 1), np.random.choice([-inity, inity], 1)
 
         new_x = self.rect.x + self.rect.width + self.dir_x
         new_y = self.rect.y + self.rect.height + self.dir_y
@@ -80,6 +80,13 @@ class Player(Sprite):
         self.agents = pg.sprite.Group()
         for agent_id, pos in agents.items():
             self.agents.add(Agent(agent_id, Color.AGENT, pos, w, h, 0, self.rect.x + self.rect.width, 0, self.rect.y + self.rect.height))
+        
+        width_random = randint(low=self.border_width, high=self.agent_border[0], size=self.agent_num)
+        height_random = randint(low=self.border_width, high=self.agent_border[1], size=self.agent_num)
+        agents = dict(zip(range(self.agent_num), zip(width_random, height_random)))
+
+        for agent_id, pos in agents.items():
+            self.agents.add(Agent(agent_id, Color.AGENT_B, pos, w, h, 0, self.rect.x + self.rect.width, 0, self.rect.y + self.rect.height))
     
     def load_everything(self):
         self._custom_ui()
@@ -98,7 +105,7 @@ class Player(Sprite):
         # refill backgroud
         self.surf.fill(self.bg_color)
 
-        step = list(self.step_random(self.agent_num))
+        step = list(self.step_random(self.agent_num * 2))
         for i in range(len(step)):
             self.agents.sprites()[i].move(step[i][0], step[i][1]) 
         self.agents.draw(self.surf)
