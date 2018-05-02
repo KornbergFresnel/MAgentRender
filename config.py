@@ -16,7 +16,8 @@ FLUSH_FREQ = 1
 class Color:
     BLACK = (0, 0, 0)
     WHITE = (255, 255, 255)
-    AGENT = (94, 156, 198)
+    # AGENT = (94, 156, 198)  # modify to a lambd
+    AGENT = lambda i: [(255, 0, 0), (0, 255, 0)][i]
     AGENT_B = (0, 0, 0)
     HOVERED = (255, 0, 0)
     CLICKED = (0, 255, 0)
