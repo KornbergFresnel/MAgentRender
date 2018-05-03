@@ -120,7 +120,6 @@ class ControlPanel(Sprite):
     def _local_view(self, centry_offset: int, agent_id=None):
         # Set title
         height = self.height - centry_offset - int(self.height * 0.04)
-        # height = int(self.height * 0.35)
         topx, topy, width, height = self._set_title(content='Attention View', font_size=int(40 * GLOBAL_SCALE), centry_offset=centry_offset, height=height)
         centery = topy + int(height / 2)
         print('[INFO] ', width, height)
