@@ -1,3 +1,7 @@
+"""Attention support for display local view of a certain agent,
+it is in test processing currently
+"""
+
 import pygame as pg
 import numpy as np
 import math
@@ -14,7 +18,7 @@ def draw_rects(surf, color, num, size, x_min, x_max, y_min, y_max):
     width_random = np.random.randint(low=x_min, high=x_max, size=num)
     height_random = np.random.randint(low=y_min, high=y_max, size=num)
     pos_list = list(zip(width_random, height_random))
-    # pool = ThreadPool(4)
+
     for pos in pos_list:
         color = Color.AGENT if pos[0] % 2 == 0 else Color.AGENT_B
         pg.draw.rect(surf, color, [pos[0], pos[1], size, size])
