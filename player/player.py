@@ -4,7 +4,7 @@ import numpy as np
 from pygame.locals import *
 from numpy.random import randint
 from pygame.sprite import Sprite
-from config import Color
+from config import Color, GLOBAL_SCALE
 from config import SPEED_MAX, SPEED_MIN
 from multiprocessing.pool import Pool
 from agent import AgentGroup
@@ -29,18 +29,17 @@ class Player(Sprite):
 
     def _custom_ui(self):
         # Display some text at center
-        font = pg.font.Font(None, 36)
+        font = pg.font.Font(None, int(36 * GLOBAL_SCALE))
         text = font.render('Hello World!', 1, (255, 255, 255))
         textpos = text.get_rect(center=(self.rect.centerx, self.rect.centery))
         self.surf.blit(text, textpos)
 
-    def _init_obj(self, pos_list):
+    def _init_obj(self, pos_list: list):
         w, h = self.agent_property['size']
-        # Produce agent
-        # width_random = randint(low=self.border_width, high=self.agent_border[0], size=self.agent_num)
-        # height_random = randint(low=self.border_width, high=self.agent_border[1], size=self.agent_num)
-        assert len(pos_list) == self.n_group
+        x_min, x_max = 0, self.width - w
+        y_min, y_max = 0, self.height - h
 
+        assert len(pos_list) == self.n_group
         for i in range(self.n_group):
             self.agent_group.append(AgentGroup(self.agent_num, pos_list[i], Color.AGENT(i), w, h, x_min, x_max, y_min, y_max))
 
@@ -48,26 +47,34 @@ class Player(Sprite):
         self._custom_ui()
         self._init_obj(pos_list)
 
-    def flush_fps(self, fps: int, color: tuple):
+    def flush_fps(self, fps: int):
         font = pg.font.Font(None, 20)
-        fps_text = font.render('FPS: {}'.format(fps), 1, color)
+        fps_text = font.render('FPS: {}'.format(fps), 1, Color.BLACK)
         self.last_fps = fps
         textpos = fps_text.get_rect()
         textpos.centerx = self.rect.centerx
         self.surf.blit(fps_text, textpos)
 
-    def update_state(self, state_list):
+    def update_state(self, state_list: list):
+        """Update states of agents with different groups
+
+        Parameters
+        ----------
+        states: list
+            a state list, and the elements in it are StateLists
+        """
+
         for i in range(self.n_group):
             self.agent_group[i].update_states(state_list[i])
 
     def update(self, *args):
         """Let agent go
         """
-        # refill backgroud
+
         self.surf.fill(self.bg_color)
 
         for i in range(self.n_group):
             self.agent_group[i].draw(self.surf)
             self.agent_group[i].update()
 
-        self.flush_fps(fps=args[0], color=Color.BLACK)
+        self.flush_fps(fps=args[0])
