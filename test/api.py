@@ -1,6 +1,7 @@
 import numpy as np
 from env.python.magent import GridWorld
 from test.senario import generate_simple_gw
+from meta import StateList
 
 
 class Resolution(object):
@@ -80,7 +81,7 @@ class Env(object):
         pos = self.resolution.refactory(np.array(pos))
 
         result = list(zip(ids, alive, pos))
-        return result
+        return StateList(result)
 
 
 class ModelGroup(object):
