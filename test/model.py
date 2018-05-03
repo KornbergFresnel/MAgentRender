@@ -17,7 +17,7 @@ class CNNEmbedding(object):
 
 
 class DQN(object):
-    def __init__(self, obs_shape, feat_shape, global_scope, act_n, memory=None, action_noise=None, learning_rate=1e-4, gamma=0.995, use_weight=None, use_eps=True, q_learning_rate=1e-4,
+    def __init__(self, obs_shape, feat_shape, global_scope, act_n, memory=None, action_noise=None, learning_rate=1e-4, gamma=0.995, use_eps=True, q_learning_rate=1e-4,
                  v_learning_rate=1e-4, u_learning_rate=1e-4, tau=0.001, update_every=5, use_dueling=False, use_graident_clip=False):
         super().__init__()
         # Inputs

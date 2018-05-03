@@ -10,6 +10,7 @@ from player import Player
 from controls import ControlPanel
 from api import Env
 from api import ModelGroup
+from model import DQN
 
 
 # ==== Initialize environment ====
@@ -27,7 +28,7 @@ env = Env('battle', in_range={'x': [0, resolution[0] - split_line], 'y': [0, res
 
 
 # ==== Set player ====
-player = Player(pos=(0, 0), control_area=(resolution[0] - split_line, resolution[1]), bg_color=config.PLAYER_BG_COLOR, agent_num=228)
+player = Player(pos=(0, 0), control_area=(resolution[0] - split_line, resolution[1]), bg_color=config.PLAYER_BG_COLOR, agent_num=env.agent_num)
 player.load_everything(pos_list=env.get_states())
 
 
@@ -37,7 +38,7 @@ control.load_everything()
 
 
 # ==== Set models ====
-model_group = ModelGroup(sub_models=None, env=env)
+model_group = ModelGroup(sub_models=DQN, env=env)
 
 
 # ==== Main runner ====
@@ -46,7 +47,7 @@ clock = pg.time.Clock()
 step = 0
 function = lambda x: np.sin(x * 0.02 * np.pi)
 learning_curve = [function(step)]
-max_len = 200
+max_len = 400
 group = pg.sprite.Group(player, control)
 
 env.start()
