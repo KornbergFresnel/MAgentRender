@@ -32,7 +32,7 @@ class GridWorld(Environment):
         if isinstance(config, str):
             # built-in config are stored in python/magent/builtin/config
             try:
-                demo_game = importlib.import_module('magent.builtin.config.' + config)
+                demo_game = importlib.import_module('env.magent.builtin.config.' + config)
                 config = getattr(demo_game, 'get_config')(**kwargs)
             except AttributeError:
                 raise BaseException('unknown built-in game "' + config + '"')

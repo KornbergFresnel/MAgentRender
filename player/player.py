@@ -1,17 +1,14 @@
 import pygame as pg
-import numpy as np
 
 from pygame.locals import *
-from numpy.random import randint
 from pygame.sprite import Sprite
 from config import Color, GLOBAL_SCALE
-from config import SPEED_MAX, SPEED_MIN
-from multiprocessing.pool import Pool
-from agent import AgentGroup
+
+from player.agent import AgentGroup
 
 
 class Player(Sprite):
-    def __init__(self, pos, control_area: tuple, bg_color: tuple, n_group: int, agent_num: int, pos: list):
+    def __init__(self, pos: tuple, control_area: tuple, bg_color: tuple, n_group: int, agent_num: list):
         super().__init__()
         self.bg_color = bg_color
         self.surf = pg.Surface(control_area).convert()
@@ -31,36 +28,38 @@ class Player(Sprite):
         # Display some text at center
         font = pg.font.Font(None, int(36 * GLOBAL_SCALE))
         text = font.render('Hello World!', 1, (255, 255, 255))
-        textpos = text.get_rect(center=(self.rect.centerx, self.rect.centery))
-        self.surf.blit(text, textpos)
+        text_pos = text.get_rect(center=(self.rect.centerx, self.rect.centery))
+        self.surf.blit(text, text_pos)
 
-    def _init_obj(self, pos_list: list):
+    def _init_obj(self, state_list: list):
         w, h = self.agent_property['size']
-        x_min, x_max = 0, self.width - w
-        y_min, y_max = 0, self.height - h
+        x_min, x_max = self.rect.x, self.rect.x + self.width - w
+        y_min, y_max = self.rect.y, self.rect.y + self.height - h
 
-        assert len(pos_list) == self.n_group
+        assert len(state_list) == self.n_group
         for i in range(self.n_group):
-            self.agent_group.append(AgentGroup(self.agent_num, pos_list[i], Color.AGENT(i), w, h, x_min, x_max, y_min, y_max))
+            self.agent_group.append(AgentGroup((self.width / 4, self.height / 4), self.agent_num[i], state_list[i],
+                                               Color.AGENT(i), w, h, x_min, x_max, y_min, y_max))
 
     def load_everything(self, pos_list):
         self._custom_ui()
         self._init_obj(pos_list)
 
-    def flush_fps(self, fps: int):
+    def flush_info(self, fps: int, nums: list):
         font = pg.font.Font(None, 20)
-        fps_text = font.render('FPS: {}'.format(fps), 1, Color.BLACK)
+        fps_text = font.render('FPS: {} / NUMS: {}'.format(fps, (nums[0], nums[1])), 1, Color.BLACK)
         self.last_fps = fps
-        textpos = fps_text.get_rect()
-        textpos.centerx = self.rect.centerx
-        self.surf.blit(fps_text, textpos)
+        text_pos = fps_text.get_rect()
+        text_pos.centerx = self.rect.centerx
+        text_pos.centery += 10
+        self.surf.blit(fps_text, text_pos)
 
     def update_state(self, state_list: list):
         """Update states of agents with different groups
 
         Parameters
         ----------
-        states: list
+        state_list: list
             a state list, and the elements in it are StateLists
         """
 
@@ -77,4 +76,4 @@ class Player(Sprite):
             self.agent_group[i].draw(self.surf)
             self.agent_group[i].update()
 
-        self.flush_fps(fps=args[0])
+        self.flush_info(fps=args[0], nums=args[2])

@@ -5,9 +5,9 @@ import config
 
 from pygame.locals import *
 
-from utils import Hold
+from entity import Hold
 from player import Player
-from controls import ControlPanel
+from control.controls import ControlPanel
 
 
 hold = Hold()

@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from magent.model import BaseModel
+from env.magent.model import BaseModel
 
 
 class RandomActor(BaseModel):

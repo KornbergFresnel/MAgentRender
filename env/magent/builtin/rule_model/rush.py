@@ -3,8 +3,8 @@
 import ctypes
 import numpy as np
 
-from magent.model import BaseModel
-from magent.c_lib import _LIB, as_int32_c_array, as_float_c_array
+from env.magent.model import BaseModel
+from env.magent.c_lib import _LIB, as_int32_c_array, as_float_c_array
 
 
 class RushPredator(BaseModel):

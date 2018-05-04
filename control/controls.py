@@ -11,9 +11,9 @@ from widgets.attention import Attention
 
 
 class ControlPanel(Sprite):
-    def __init__(self, pos, control_area: tuple, bg_color: tuple):
+    def __init__(self, pos, control_area: tuple, bg_color: tuple, init_points: list):
         super().__init__()
-        self.surf = pg.Surface(control_area).convert()
+        self.surf = pg.Surface(control_area)
         self.surf.fill(bg_color)
         self.rect = self.surf.get_rect(center=(pos[0] + int(control_area[0] / 2), pos[1] + int(control_area[1] / 2)))
         self.image = self.surf
@@ -23,8 +23,9 @@ class ControlPanel(Sprite):
         self.boder_margin = int(self.width * 0.03)
         self.bg_color = bg_color
         self.centry_set = {}
+        self._init_points = init_points
         self.group = pg.sprite.Group()
-    
+
     def _custom_ui(self):
         # Display some text at center
         font = pg.font.Font(None, int(45 * GLOBAL_SCALE))
@@ -78,7 +79,7 @@ class ControlPanel(Sprite):
         # Set title
         height = int(self.height * 0.3)
         topx, topy, width, height = self._set_title(content='Learning curve', font_size=int(40 * GLOBAL_SCALE), centry_offset=centry_offset, height=height)
-        self.group.add(StatisPanel(pos=(topx, topy), width=width, height=height, dpi=40, bg_color=self.bg_color))
+        self.group.add(StatisPanel(pos=(topx, topy), width=width, height=height, dpi=40, bg_color=self.bg_color, init_points=self._init_points))
         return topy + height
     
     def _add_widgets(self, centry_offset: int):
@@ -120,7 +121,8 @@ class ControlPanel(Sprite):
     def _local_view(self, centry_offset: int, agent_id=None):
         # Set title
         height = self.height - centry_offset - int(self.height * 0.04)
-        topx, topy, width, height = self._set_title(content='Attention View', font_size=int(40 * GLOBAL_SCALE), centry_offset=centry_offset, height=height)
+        topx, topy, width, height = self._set_title(content='Attention View', font_size=int(40 * GLOBAL_SCALE),
+                                                    centry_offset=centry_offset, height=height)
         centery = topy + int(height / 2)
         print('[INFO] ', width, height)
         self.group.add(Attention((self.relate_center[0], centery), width, height, self.bg_color))

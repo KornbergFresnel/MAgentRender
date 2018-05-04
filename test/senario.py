@@ -4,7 +4,7 @@ import time
 
 import numpy as np
 
-from env.python.magent import GridWorld
+from env.magent import GridWorld
 
 
 def generate_simple_gw(env: GridWorld, map_size: int, handles: list):
@@ -21,10 +21,7 @@ def generate_simple_gw(env: GridWorld, map_size: int, handles: list):
     init_num = map_size * map_size * 0.04
     gap = 3  # the margin of each agent
 
-    if random.random() < 0.5:
-        left_id, right_id = 1, 0
-    else:
-        left_id, right_id = 0, 1
+    left_id, right_id = 0, 1
 
     # === Left settings ===
     side = int(math.sqrt(init_num)) * 2

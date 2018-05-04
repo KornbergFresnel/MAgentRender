@@ -1,6 +1,6 @@
 """ battle of two armies """
 
-import magent
+import env.magent as magent
 
 
 def get_config(map_size):

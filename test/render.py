@@ -5,16 +5,17 @@ import config
 
 from pygame.locals import *
 
-from utils import Hold
-from player import Player
-from controls import ControlPanel
-from api import Env
-from api import ModelGroup
-from model import DQN
+from entity import Hold
+from test.api import Env, ModelGroup
+from test.model import DQN
+from player.player import Player
+from control.controls import ControlPanel
 
 
 # ==== Initialize environment ====
 hold = Hold()
+max_steps = 600
+map_size = 100
 
 pg.init()
 info = pg.display.Info()
@@ -24,35 +25,37 @@ hold.screen = pg.display.set_mode(resolution, DOUBLEBUF | HWSURFACE, 0)
 pg.display.set_caption('Magent Render')
 
 split_line = int(resolution[0] * (1. - config.SPLIT_ETA))
-env = Env('battle', in_range={'x': [0, resolution[0] - split_line], 'y': [0, resolution[1]]})
+env = Env('battle', in_range={'x': [0, resolution[0] - split_line], 'y': [0, resolution[1]]}, max_steps=max_steps,
+          map_size=map_size)
 
 
 # ==== Set player ====
-player = Player(pos=(0, 0), control_area=(resolution[0] - split_line, resolution[1]), bg_color=config.PLAYER_BG_COLOR, agent_num=env.agent_num)
+player = Player(pos=(0, 0), control_area=(resolution[0] - split_line, resolution[1]), bg_color=config.PLAYER_BG_COLOR,
+                agent_num=env.agent_num, n_group=2)
 player.load_everything(pos_list=env.get_states())
 
 
 # ==== Set control panel ====
-control = ControlPanel(pos=(resolution[0] - split_line, 0), control_area=(split_line, resolution[1]), bg_color=config.CONTROL_BG_COLOR)
+control = ControlPanel(pos=(resolution[0] - split_line, 0), control_area=(split_line, resolution[1]),
+                       bg_color=config.CONTROL_BG_COLOR, init_points=env.get_rewards())
 control.load_everything()
 
 
 # ==== Set models ====
-model_group = ModelGroup(sub_models=DQN, env=env)
+model_group = ModelGroup(sub_models=[DQN, DQN], env=env)
 
 
 # ==== Main runner ====
 hold.running = True
 clock = pg.time.Clock()
 step = 0
-function = lambda x: np.sin(x * 0.02 * np.pi)
-learning_curve = [function(step)]
 max_len = 400
 group = pg.sprite.Group(player, control)
-
+learning_curve = env.get_rewards()
 env.start()
+done = False
 
-while hold.running:
+while hold.running and step < max_steps and not done:
     for event in pg.event.get():
         if event.type == QUIT:
             hold.running = False
@@ -65,12 +68,14 @@ while hold.running:
     # player need update states
     actions = model_group.act(obs=env.get_obs())
     player.update_state(env.get_states(actions))
-    group.update(int(clock.get_fps()), learning_curve if step % config.FLUSH_FREQ == 0 else None)
+    group.update(int(clock.get_fps()), learning_curve if step % config.FLUSH_FREQ == 0 else None, env.get_num())
     pg.display.flip()
     clock.tick(config.FPS)
+    done = env.done
     step += 1
-    learning_curve.append(function(step))
-    if len(learning_curve) > max_len:
-        learning_curve = learning_curve[1:]
+    learning_curve = env.get_rewards()
+    if len(learning_curve[0]) > 80:
+        for i in range(2):
+            learning_curve[i] = learning_curve[i][-80:]
 
 pg.quit()

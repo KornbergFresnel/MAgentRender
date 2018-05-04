@@ -8,7 +8,7 @@ from pygame.sprite import Sprite
 
 
 class StatisPanel(Sprite):
-    def __init__(self, pos, width, height, dpi, bg_color):
+    def __init__(self, pos, width, height, dpi, bg_color, init_points):
         super().__init__()
         self.pos = pos
         self.width = width
@@ -20,15 +20,17 @@ class StatisPanel(Sprite):
         plt.style.use('seaborn-darkgrid')
         self.palette = plt.get_cmap('Set1')
 
-        self._set([0])
+        self._set(init_points)
     
     def _set(self, learning_curve=None):
         plt.close()
         fig = pylab.figure(figsize=self.figsize, dpi=self.dpi)
         ax = fig.gca()
 
-        # load data  
-        ax.plot(np.arange(len(learning_curve)), learning_curve, color=self.palette(0))
+        # load data
+        ax.plot(np.arange(len(learning_curve[0])), learning_curve[0], color=self.palette(0))
+        ax.plot(np.arange(len(learning_curve[1])), learning_curve[1], color=self.palette(1))
+
         plt.tight_layout()
         canvas = agg.FigureCanvasAgg(fig)
         canvas.draw()
@@ -43,4 +45,3 @@ class StatisPanel(Sprite):
             return
         self.image.fill(self.bg_color, pg.Rect(self.pos[0], self.pos[1], self.width, self.height))
         self._set(learning_curve)
-        

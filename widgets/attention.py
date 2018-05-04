@@ -19,8 +19,8 @@ def draw_rects(surf, color, num, size, x_min, x_max, y_min, y_max):
     height_random = np.random.randint(low=y_min, high=y_max, size=num)
     pos_list = list(zip(width_random, height_random))
 
-    for pos in pos_list:
-        color = Color.AGENT if pos[0] % 2 == 0 else Color.AGENT_B
+    for i, pos in enumerate(pos_list):
+        color = Color.AGENT(i % 2)
         pg.draw.rect(surf, color, [pos[0], pos[1], size, size])
     
 

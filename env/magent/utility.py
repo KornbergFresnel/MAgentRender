@@ -9,7 +9,7 @@ import logging
 import collections
 import os
 
-from magent.builtin.rule_model import RandomActor
+from env.magent.builtin.rule_model import RandomActor
 
 
 class EpisodesBufferEntry:
