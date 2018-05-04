@@ -2,12 +2,13 @@ import pygame as pg
 import numpy as np
 
 import config
+import os.path as osp
 
 from pygame.locals import *
 
 from entity import Hold
 from test.api import Env, ModelGroup
-from test.model import DQN
+from test.net import Net
 from player.player import Player
 from control.controls import ControlPanel
 
@@ -15,7 +16,7 @@ from control.controls import ControlPanel
 # ==== Initialize environment ====
 hold = Hold()
 max_steps = 600
-map_size = 100
+map_size = 80
 
 pg.init()
 info = pg.display.Info()
@@ -42,7 +43,8 @@ control.load_everything()
 
 
 # ==== Set models ====
-model_group = ModelGroup(sub_models=[DQN, DQN], env=env)
+model_group = ModelGroup(sub_models=[Net, Net], env=env, args={'name': ['trusty-battle-game-l', 'trusty-battle-game-r']})
+model_group.load(osp.join(config.DATA_DIR, "trusty-battle-game-l"), osp.join(config.DATA_DIR, 'trusty-battle-game-r'))
 
 
 # ==== Main runner ====

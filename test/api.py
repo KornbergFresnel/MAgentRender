@@ -107,16 +107,16 @@ class Env(object):
 
 
 class ModelGroup(object):
-    def __init__(self, sub_models: list, env: Env):
+    def __init__(self, sub_models: list, env: Env, args: dict):
         self.n_models = len(sub_models)
         self.models = []
         for i in range(self.n_models):
-            with tf.variable_scope('agent_{}'.format(i)):
-                global_scope = tf.get_variable_scope().name
-                obs_shape = env.env.get_view_space(env.handles[i])
-                feat_shape = env.env.get_feature_space(env.handles[i])
-                act_n = env.env.get_action_space(env.handles[i])[0]
-                self.models.append(sub_models[i](obs_shape, feat_shape, global_scope, act_n))
+            # with tf.variable_scope('agent_{}'.format(i)):
+            #     global_scope = tf.get_variable_scope().name
+            obs_shape = env.env.get_view_space(env.handles[i])
+            feat_shape = env.env.get_feature_space(env.handles[i])
+            act_n = env.env.get_action_space(env.handles[i])[0]
+            self.models.append(sub_models[i](obs_shape, feat_shape, args['name'][i], act_n))
 
     def act(self, **kwargs):
         """Obs is necessary, then this method will return a list whose
@@ -128,3 +128,7 @@ class ModelGroup(object):
             # print('[INFO] Action:', action)
             actions.append(action)
         return actions
+
+    def load(self, *args):
+        for i, dir_name in enumerate(args):
+            self.models[i].load(dir_name)

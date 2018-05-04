@@ -6,6 +6,45 @@ import tensorflow.contrib as tc
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
+class BaseFrame(object):
+    def __init__(self, name, global_scope):
+        self.name = name
+        self.global_scope = global_scope
+        self.path_format = "{}_{}".format
+
+        self.sess = None
+
+    def _initialize(self):
+        raise NotImplementedError
+
+    def act(self, **kwargs):
+        raise NotImplementedError
+
+    def store_transition(self, **kwargs):
+        raise NotImplementedError
+
+    def train(self):
+        raise NotImplementedError
+
+    def save(self, model_dir, step):
+        model_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, self.global_scope)
+        saver = tf.train.Saver(model_vars)
+        save_path = saver.save(self.sess, os.path.join(model_dir, self.path_format(self.name, step)))
+        # print(Color.INFO.format('[INFO] Saved model at:' + save_path))
+
+    def load(self, model_dir, step):
+        save_path = os.path.join(model_dir, self.path_format(self.name, step))
+        try:
+            model_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, self.global_scope)
+            saver = tf.train.Saver(model_vars)
+            saver.restore(self.sess, save_path)
+            # print(Color.INFO.format('[INFO] Loaded model from: ' + save_path))
+        except Exception as e:
+            pass
+            # print(Color.ERROR.format('[ERROR] Loaded failed, please checkt `{}` exists'.format(save_path)))
+
+
+
 class Model(object):
     def __init__(self, name):
         self.name = name
