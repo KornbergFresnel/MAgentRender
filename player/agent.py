@@ -2,7 +2,7 @@ import pygame as pg
 
 from pygame.sprite import Sprite
 from pygame.sprite import Group
-from test.meta import State, StateList
+from api.meta import State, StateList
 
 
 class Agent(Sprite):

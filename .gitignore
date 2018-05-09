@@ -4,3 +4,4 @@
 **/**.pyc
 data/
 **/.DS_Store
+models/

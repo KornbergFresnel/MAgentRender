@@ -2,8 +2,8 @@ import numpy as np
 import tensorflow as tf
 from env.magent import GridWorld
 
-from test.senario import generate_simple_gw
-from test.meta import StateList
+from api.senario import generate_simple_gw
+from api.meta import StateList
 
 
 class Resolution(object):
@@ -97,7 +97,7 @@ class Env(object):
         # pos at here you can make resolution
         pos = [self.env.get_pos(self.handles[i]) for i in range(self.n_group)]
         for i in range(self.n_group):
-            self._rewards[i].append(sum(self.env.get_reward(self.handles[i])))
+            self._rewards[i].append(self._rewards[i][-1] + sum(self.env.get_reward(self.handles[i])))
         self.env.clear_dead()
 
         pos = self.resolution(pos)
