@@ -55,6 +55,11 @@ class Env(object):
 
         obs = [self.env.get_observation(self.handles[i]) for i in range(self.n_group)]
         return obs
+    
+    def get_neighbor(self):
+        """Neighbor includes feature vector (or message of local agents)
+        """
+        return [self.env.get_neighbors(self.handles[i]) for i in range(self.n_group)]
 
     def get_num(self):
         nums = [self.env.get_num(self.handles[i]) for i in range(self.n_group)]
@@ -107,17 +112,19 @@ class Env(object):
 
 
 class ModelGroup(object):
-    def __init__(self, sub_models: list, env: Env, args: dict):
+    def __init__(self, sub_models: list, env: Env, names: list):
         self.n_models = len(sub_models)
         self.models = []
         sess = tf.Session()
+
         for i in range(self.n_models):
-            with tf.variable_scope('agent_{}'.format(i)):
+            with tf.variable_scope('agent_{}_{}'.format(names[i], i)):
                 global_scope = tf.get_variable_scope().name
                 obs_shape = env.env.get_view_space(env.handles[i])
                 feat_shape = env.env.get_feature_space(env.handles[i])
                 act_n = env.env.get_action_space(env.handles[i])[0]
-                self.models.append(sub_models[i](obs_shape, feat_shape, act_n, global_scope, sess=sess))
+                self.models.append(sub_models[i](obs_shape, feat_shape, act_n, None, global_scope, sess=sess))
+
         sess.run(tf.global_variables_initializer())
         for i in range(self.n_models):
             self.models[i].initialize()
@@ -128,8 +135,7 @@ class ModelGroup(object):
         """
         actions = []
         for i in range(self.n_models):
-            action = self.models[i].act(ids=kwargs['ids'][i], obs=kwargs['obs'][i][0], feat=kwargs['obs'][i][1], eps=0.05)
-            # print('[INFO] Action:', action)
+            action = self.models[i].act(ids=kwargs['ids'][i], obs=kwargs['obs'][i][0], feat=kwargs['obs'][i][1], neighbor=kwargs['neighbor'][i], eps=0.05)
             actions.append(action)
         return actions
 

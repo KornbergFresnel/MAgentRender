@@ -14,15 +14,20 @@ from config import Color
 from multiprocessing.dummy import Pool as ThreadPool
 
 
-def draw_rects(surf, color, num, size, x_min, x_max, y_min, y_max):
-    width_random = np.random.randint(low=x_min, high=x_max, size=num)
-    height_random = np.random.randint(low=y_min, high=y_max, size=num)
-    pos_list = list(zip(width_random, height_random))
+# def draw_rects(surf, color, num, size, x_min, x_max, y_min, y_max):
+#     width_random = np.random.randint(low=x_min, high=x_max, size=num)
+#     height_random = np.random.randint(low=y_min, high=y_max, size=num)
+#     pos_list = list(zip(width_random, height_random))
 
+#     for i, pos in enumerate(pos_list):
+#         color = Color.AGENT(i % 2)
+#         pg.draw.rect(surf, color, [pos[0], pos[1], size, size])
+
+
+def draw_rects(surf, pos: list, colors: list, num: int, size: int, x_min: int, x_max: int, y_min: int, y_max: int):
     for i, pos in enumerate(pos_list):
-        color = Color.AGENT(i % 2)
-        pg.draw.rect(surf, color, [pos[0], pos[1], size, size])
-    
+        pg.draw.rect(surf, colors[i], [pos[0], pos[1], size, size])
+
 
 class Attention(Sprite):
     def __init__(self, pos, width, height, bg_color):
@@ -50,11 +55,16 @@ class Attention(Sprite):
         self.stat = 1
         
     def _set(self, attention=None):
+        """Accept attention from outer, then render with different color
+        """
+        base_color = (255, 255, 255)
+        colors = base_color * attention['weight']
         pg.draw.circle(self.image, (255, 255, 255), [self.fake_centerx, self.fake_centery], self.radius, self.radius)
-        draw_rects(self.image, Color.AGENT, num=10, size=10, x_min=self.min_x, x_max=self.max_x - 10, y_min=self.min_y, y_max=self.max_y - 10)
-    
+
+        draw_rects(self.image, attention['pos'], colors, num=attention['num'], size=10, x_min=self.min_x, x_max=self.max_x - 10, y_min=self.min_y, y_max=self.max_y - 10)
+
     def update(self, *args):
         if self.stat % 1 == 0:
             self.image.fill(self.bg_color)
-            self._set()
+            self._set(args[-1])
         self.stat += 1
