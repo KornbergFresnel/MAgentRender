@@ -9,6 +9,8 @@ from pygame.locals import *
 from entity import Hold
 from api.api import Env, ModelGroup
 from models.Net.net import Net
+from models.dqn.dqn import DQN
+from models.fdq.fdq2 import FDQ
 from player.player import Player
 from control.controls import ControlPanel
 
@@ -16,7 +18,7 @@ from control.controls import ControlPanel
 # ==== Initialize environment ====
 hold = Hold()
 max_steps = 600
-map_size = 80
+map_size = 40
 
 pg.init()
 info = pg.display.Info()
@@ -43,8 +45,12 @@ control.load_everything()
 
 
 # ==== Set models ====
-model_group = ModelGroup(sub_models=[Net, Net], env=env, args={'name': ['trusty-battle-game-l', 'trusty-battle-game-r']})
-model_group.load(osp.join(config.DATA_DIR, "trusty-battle-game-l"), osp.join(config.DATA_DIR, 'trusty-battle-game-r'))
+model_group = ModelGroup(sub_models=[FDQ, DQN], env=env, args={'name': ['trusty-battle-game-l', 'trusty-battle-game-r']})
+# dirs = [osp.join(config.DATA_DIR, 'DQN-0'), osp.join(config.DATA_DIR, 'FDQ-1')]
+dirs = [osp.join(config.DATA_DIR, 'FDQ-0'), osp.join(config.DATA_DIR, 'DQN-1')]
+# epochs = [719, 1599]
+epochs = [1569, 719]
+model_group.load(dirs, epochs)
 
 
 # ==== Main runner ====
@@ -68,7 +74,7 @@ while hold.running and step < max_steps and not done:
     group.draw(hold.screen)
 
     # player need update states
-    actions = model_group.act(obs=env.get_obs())
+    actions = model_group.act(obs=env.get_obs(), ids=env.get_num())
     player.update_state(env.get_states(actions))
     group.update(int(clock.get_fps()), learning_curve if step % config.FLUSH_FREQ == 0 else None, env.get_num())
     pg.display.flip()

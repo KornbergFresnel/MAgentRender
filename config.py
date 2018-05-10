@@ -3,7 +3,7 @@ import os.path as osp
 
 BASE_DIR = osp.dirname(osp.abspath(__file__))
 DATA_DIR = osp.join(BASE_DIR, 'data')
-GLOBAL_SCALE = 0.9
+GLOBAL_SCALE = 0.8
 MAIN_BG_COLOR = (255, 255, 255)
 PLAYER_BG_COLOR = (255, 255, 255)
 CONTROL_BG_COLOR = (0, 42, 56)
